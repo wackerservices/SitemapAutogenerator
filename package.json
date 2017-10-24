@@ -1,12 +1,14 @@
 {
   "name": "sitemap-autogenerator",
-  "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "version": "0.0.1",
+  "description": "An ember-cli addon to parse router.js and automatically generate a sitemap.xml.",
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "router.js-parser",
+    "sitemap.xml-generator"
   ],
   "license": "MIT",
-  "author": "",
+  "author": "Ross Updegraff",
   "directories": {
     "doc": "doc",
     "test": "tests"
