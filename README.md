@@ -3,7 +3,7 @@
 An Ember addon for ember-cli that auto-generates a sitemap.xml file and adds it to the project.
 
 ## Installation
-** This AddOn requires ember-cli version >= X.X.XX
+**This AddOn requires ember-cli version >= X.X.XX**
 
 To install simply run:
 ```npm install --save-dev sitemap-autogenerator```
