@@ -8,7 +8,7 @@
     "sitemap.xml-generator"
   ],
   "license": "MIT",
-  "author": "Ross Updegraff",
+  "author": "Ross Updegraff <npm.rupdegraff@chicagoventure.com",
   "directories": {
     "doc": "doc",
     "test": "tests"
