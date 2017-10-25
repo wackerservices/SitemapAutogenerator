@@ -136,7 +136,7 @@ function writeToFile() {
     if (err) {
       return console.log(err);
     }
-    console.log("\nA new version of sitemap.xml was successfully saved! Ending program...");
+    console.log("\nA new version of sitemap.xml was successfully saved...\n");
   });
 }
 
