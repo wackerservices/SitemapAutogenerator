@@ -34,7 +34,7 @@ sitemapAutogenerator.triggerSitemapBuilder();
 
 ## Current Limitations
 
-* Route autogeneration is limited to routes up to two children deep.
+* Route autogeneration is limited to routes up to two children deep, ie "<BASE>/<SEGMENT>/<SEGMENT>".
 * All routes will be added to **sitemap.xml** with the exception of any route with path "*".
 * Routes with dynamic segments, ie "/artist/:artist_id", are not yet supported.
 * The sitemap-autogenerator is limited to basic XML sitemaps and cannot currently manage image and video file information for resources on a page.
