@@ -3,7 +3,6 @@
 The **Beta** version of an Ember AddOn for ember-cli that auto-generates a **sitemap.xml** file and adds it to the project.
 
 ## Installation
-**This AddOn requires ember-cli version >= X.X.XX**
 
 To install simply run:
 
@@ -37,7 +36,21 @@ sitemapAutogenerator.triggerSitemapBuilder();
 
 * Route autogeneration is limited to routes up to two children deep.
 * All routes will be added to **sitemap.xml** with the exception of any route with an * or...
+* The sitemap-autogenerator is limited to basic XML sitemaps and cannot currently manage image and video file information for resources on a page.
 * There is no way to currently assign custom ```<priority>``` values for specific routes.
+
+## Example of Output
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.<mysite>.com/</loc>
+    <lastmod>2017-10-31</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+</urlset>
+```
 
 ## Running Tests
 
