@@ -23,7 +23,7 @@ You may continue to trigger manual builds this way.
 To add **sitemap-autogenerator** to your ember-cli builds:
 
   Add the following code to **ember-cli-build.js**: 
-```
+```js
 const sitemapAutogenerator = require('sitemap-autogenerator/blueprints/sitemap-autogenerator/index');
 sitemapAutogenerator.triggerSitemapBuilder();
 ```
@@ -41,16 +41,18 @@ sitemapAutogenerator.triggerSitemapBuilder();
 
 ## Example of Output
 
-<pre><i>/* app/public/sitemap.xml */</i>
-&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"&gt;
-&nbsp;&nbsp;&lt;url&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;loc&gt;https://www.&lt;mysite&gt;.com/&lt;/loc&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;lastmod&gt;2017-10-31&lt;/lastmod&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;changefreq&gt;daily&lt;/changefreq&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;priority&gt;0.9&lt;/priority&gt;
-&nbsp;&nbsp;&lt;/url&gt;
-&lt;/urlset&gt;</pre>
+```xml
+<!-- app/public/sitemap.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.<mysite>.com/</loc>
+    <lastmod>2017-10-31</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+</urlset>
+```
 
 ## Running Tests
 
