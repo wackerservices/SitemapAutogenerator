@@ -15,7 +15,8 @@ const header = '<?xml version="1.0" encoding="UTF-8"?>\n' +
 
 module.exports = {
   description: '',
-  triggerSitemapBuilder: function(baseURL) {
+  triggerSitemapBuilder: function(theURL) {
+    baseURL = theURL;
     fs.readFile(pathForRouterJS, 'utf8', function (err, data) {
       if (err) return console.log('Encountered the following error:', err);
     
