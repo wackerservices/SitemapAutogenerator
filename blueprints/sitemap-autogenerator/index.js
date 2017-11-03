@@ -1,7 +1,9 @@
 /* eslint-env node */
 const fs = require('fs');
 
-const baseURL = 'https://typenex.com'; // Will need to have individual site root URL path
+// const baseURL = 'https://typenex.com'; // Will need to have individual site root URL path
+var baseURL;
+
 const pathForRouterJS = 'app/router.js';
 
 var routeArray = [];
@@ -13,7 +15,7 @@ const header = '<?xml version="1.0" encoding="UTF-8"?>\n' +
 
 module.exports = {
   description: '',
-  triggerSitemapBuilder: function() {
+  triggerSitemapBuilder: function(baseURL) {
     fs.readFile(pathForRouterJS, 'utf8', function (err, data) {
       if (err) return console.log('Encountered the following error:', err);
     
