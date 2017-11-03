@@ -25,7 +25,7 @@ To add **sitemap-autogenerator** to your ember-cli builds:
   Add the following code to **ember-cli-build.js**: 
 ```js
 const sitemapAutogenerator = require('sitemap-autogenerator/blueprints/sitemap-autogenerator/index');
-sitemapAutogenerator.triggerSitemapBuilder();
+sitemapAutogenerator.triggerSitemapBuilder('<YOUR SITE ROOT URL>');
 ```
 
 * `git clone <repository-url>` this repository
