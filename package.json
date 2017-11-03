@@ -13,7 +13,10 @@
     "doc": "doc",
     "test": "tests"
   },
-  "repository": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wackerservices/SitemapAutogenerator"
+  },
   "scripts": {
     "build": "ember build",
     "start": "ember server",
