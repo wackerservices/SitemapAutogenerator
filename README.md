@@ -43,7 +43,7 @@ sitemapAutogenerator.triggerSitemapBuilder('<YOUR SITE ROOT URL>');
 ## Example of Output
 
 ```xml
-<!-- app/public/sitemap.xml -->
+<!-- app/dist/sitemap.xml -->
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>

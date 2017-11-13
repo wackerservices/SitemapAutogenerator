@@ -135,7 +135,7 @@ function writeToFile() {
   });
   fileData += ('\n</urlset>');
 
-  fs.writeFile("public/sitemap.xml", fileData, function (err) {
+  fs.writeFile("dist/sitemap.xml", fileData, function (err) {
     if (err) {
       return console.log(err);
     }
