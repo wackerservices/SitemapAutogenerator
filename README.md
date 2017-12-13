@@ -12,25 +12,22 @@ To install simply run:
 
 ## Usage
 
-To manually trigger the first build of **sitemap.xml**:
-
-```
- ember g sitemap-autogenerator
-```
-
-You may continue to trigger manual builds this way.
-
-To add **sitemap-autogenerator** to your ember-cli builds:
-
-  Add the following code to **ember-cli-build.js**: 
-```js
-const sitemapAutogenerator = require('sitemap-autogenerator/blueprints/sitemap-autogenerator/index');
-sitemapAutogenerator.triggerSitemapBuilder('<YOUR SITE ROOT URL>');
+  Add the following code to **package.json**: 
+```python
+"postbuild": "node -e require('./node_modules/sitemap-autogenerator/blueprints/sitemap-autogenerator/index').triggerSitemapBuilder('<YOUR SITE ROOT URL>')",
 ```
 
-* `git clone <repository-url>` this repository
-* `cd sitemap-autogenerator`
-* `npm install`
+  Be sure to not have a trailing `/` after `<YOUR SITE ROOT URL>` or else you will get double `//` in your generated **sitemap.xml**
+  
+  `sitemap-autogenerator` will run at the end of each Ember build, which are run with: `npm build`
+  
+  Alternatively, you can place the above script as a `"poststart"` hook in your **package.json** file and test that a **sitemap.xml** file is created when you stop `ember s`. 
+  
+  You should see the following log message right after the `ember-cli` logs `cleaning up...`
+  
+ ```
+  A new version of sitemap.xml was successfully saved
+ ```
 
 ## Current Limitations
 
@@ -39,6 +36,7 @@ sitemapAutogenerator.triggerSitemapBuilder('<YOUR SITE ROOT URL>');
 * Routes with dynamic segments, ie "/artist/:artist_id", are not yet supported.
 * The sitemap-autogenerator is limited to basic XML sitemaps and cannot currently manage image and video file information for resources on a page.
 * There is no way to currently assign custom ```<priority>``` values for specific routes.
+* **sitemap-autogenerator** assumes you use the following standard Ember file structure: `app/dist/sitemap.xml` 
 
 ## Example of Output
 

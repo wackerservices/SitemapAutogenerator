@@ -1,7 +1,6 @@
 /* eslint-env node */
 const fs = require('fs');
 
-// const baseURL = 'https://typenex.com'; // Will need to have individual site root URL path
 var baseURL;
 
 const pathForRouterJS = 'app/router.js';
@@ -28,13 +27,12 @@ module.exports = {
   },
 
   locals: function(options) {
-    console.log('Hitting "locals" in index.js!');
-    
     fs.readFile(pathForRouterJS, 'utf8', function (err, data) {
       if (err) return console.log('Encountered the following error:', err);
     
-      data = data.split('Router.map(function() {')[1]; // Split file text into code lines by 'Router.map', resulting in two code chunks --> choose the chunk after 'Router.map'
-    
+      let splitBy = /Router.map\(\s*function\s*\(\)\s*\{/; // Provision for variations in spacing for this line
+      data = data.split(splitBy)[1]; // Split file text into code lines by 'Router.map', resulting in two code chunks --> choose the chunk after 'Router.map'
+
       splitDataIntoArrayOfRoutes(data);
       findEndOfCodeBlock(data);
     });
@@ -43,7 +41,6 @@ module.exports = {
   },
 
   afterInstall(options) {
-    console.log('Hitting "afterInstall" in index.js!');
   }
 };
 
@@ -139,7 +136,7 @@ function writeToFile() {
     if (err) {
       return console.log(err);
     }
-    console.log("\nA new version of sitemap.xml was successfully saved...\n");
+    console.log("\nA new version of sitemap.xml was successfully saved\n");
   });
 }
 
