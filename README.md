@@ -13,13 +13,13 @@ To install simply run:
 ## Usage
 
   Add the following code to **package.json**: 
-```python
+```js
 "postbuild": "node -e \"require('./node_modules/sitemap-autogenerator/blueprints/sitemap-autogenerator/index').triggerSitemapBuilder('<YOUR SITE ROOT URL>')\"",
 ```
 
   Be sure to not have a trailing `/` after `<YOUR SITE ROOT URL>` or else you will get double `//` in your generated **sitemap.xml**
   
-  `sitemap-autogenerator` will run at the end of each Ember build, which are run with: `npm build`
+  `sitemap-autogenerator` will run at the end of each Ember build, which are run with: `npm run build`
   
   Alternatively, you can place the above script as a `"poststart"` hook in your **package.json** file and test that a **sitemap.xml** file is created when you stop `ember s`. 
   
