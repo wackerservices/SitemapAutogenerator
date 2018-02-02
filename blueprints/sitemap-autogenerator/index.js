@@ -18,9 +18,9 @@ module.exports = {
     baseURL = theURL;
     fs.readFile(pathForRouterJS, 'utf8', function (err, data) {
       if (err) return console.log('Encountered the following error:', err);
-    
+
       data = data.split('Router.map(function() {')[1]; // Split file text into code lines by 'Router.map', resulting in two code chunks --> choose the chunk after 'Router.map'
-    
+
       splitDataIntoArrayOfRoutes(data);
       findEndOfCodeBlock(data);
     });
@@ -29,7 +29,7 @@ module.exports = {
   locals: function(options) {
     fs.readFile(pathForRouterJS, 'utf8', function (err, data) {
       if (err) return console.log('Encountered the following error:', err);
-    
+
       let splitBy = /Router.map\(\s*function\s*\(\)\s*\{/; // Provision for variations in spacing for this line
       data = data.split(splitBy)[1]; // Split file text into code lines by 'Router.map', resulting in two code chunks --> choose the chunk after 'Router.map'
 
@@ -58,9 +58,9 @@ function splitDataIntoArrayOfRoutes(data) {
 }
 
 function parseRouteName(data) {
-  if ((data.match(/function/)) || (data.match(/path/))) { // If there's the word function, get string after ','  
+  if ((data.match(/function/)) || (data.match(/path/))) { // If there's the word function, get string after ','
     return checkForQuoteType(data.split(',')[1]); // Check for " or ' quote type
-  } else { // If there's no 'function' or 'path'  
+  } else { // If there's no 'function' or 'path'
     return checkForQuoteType(data);
   }
 }
@@ -172,7 +172,7 @@ function formatDate(dateObject) {
   let date, year, month, day;
   day = currentDate.getDate(), month = currentDate.getMonth() + 1, year = currentDate.getFullYear();
   if (day < 10) day = '0' + day;
-  else if (month < 10) month = '0' + month;
+  if (month < 10) month = '0' + month;
   date = year + '-' + month + '-' + day;
   return date;
 }
