@@ -19,7 +19,8 @@ module.exports = {
     fs.readFile(pathForRouterJS, 'utf8', function (err, data) {
       if (err) return console.log('Encountered the following error:', err);
 
-      data = data.split('Router.map(function() {')[1]; // Split file text into code lines by 'Router.map', resulting in two code chunks --> choose the chunk after 'Router.map'
+      let splitBy = /Router.map\(\s*function\s*\(\)\s*\{/; // Provision for variations in spacing for this line
+      data = data.split(splitBy)[1]; // Split file text into code lines by 'Router.map', resulting in two code chunks --> choose the chunk after 'Router.map'
 
       splitDataIntoArrayOfRoutes(data);
       findEndOfCodeBlock(data);
