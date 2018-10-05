@@ -1,4 +1,6 @@
 /* eslint-env node */
+var ENV = require(process.cwd() + '/config/environment');
+
 const fs = require('fs');
 
 var baseURL;
@@ -123,13 +125,32 @@ function rewriteBaseRoot(indexToBeginRewrite, previousIndex, previousBaseRoot, p
 }
 
 function writeToFile() {
+  let changeFrequency, priority; // Look for custom values for 'changeFrequency' and 'defaultPriorityValue' in environment.js
+  if (ENV()["sitemap-autogenerator"].changeFrequency !== undefined) changeFrequency = ENV()["sitemap-autogenerator"].changeFrequency;
+  else changeFrequency = "daily";
+  if (ENV()["sitemap-autogenerator"].defaultPriorityValue !== undefined) priority = ENV()["sitemap-autogenerator"].defaultPriorityValue;
+  else priority = "0.5";
+
   routeArray.map(function (x, i) {
     if (i == 0) fileData += header; // Write the header
-    fileData += ('\n  <url>\n    <loc>');
-    if (routeArray[i].baseRoot == undefined) writeToFileSwitch(1, i); // Scenario 1: baseRoot is undefined
-    else if (routeArray[i].baseRoot2) writeToFileSwitch(2, i); // Scenario 2: baseRoot[X] exists
-    else writeToFileSwitch(3, i); // Scenario 3: there is a baseRoot, but no additional nested baseRoots
-    fileData += ('</loc>\n    <lastmod>' + formatDate(currentDate) + '</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>');
+
+    var regex = /\//g;
+    let currentPath = routeArray[i].path;
+
+    currentPath = currentPath.replace(regex, '');
+    if (ENV()["sitemap-autogenerator"].ignore[currentPath] === undefined) {
+      fileData += ('\n  <url>\n    <loc>');
+      if (routeArray[i].baseRoot == undefined) writeToFileSwitch(1, i); // Scenario 1: baseRoot is undefined
+      else if (routeArray[i].baseRoot2) writeToFileSwitch(2, i); // Scenario 2: baseRoot[X] exists
+      else writeToFileSwitch(3, i); // Scenario 3: there is a baseRoot, but no additional nested baseRoots
+  
+      if (ENV()["sitemap-autogenerator"].customPriority[currentPath] !== undefined) priority = ENV()["sitemap-autogenerator"].customPriority[currentPath];
+      console.log(currentPath);
+
+      fileData += ('</loc>\n    <lastmod>' + formatDate(currentDate) + '</lastmod>\n    <changefreq>' + changeFrequency + '</changefreq>\n    <priority>' + priority + '</priority>\n  </url>');
+    } else {
+      console.log("\n** Ignored route: ", currentPath + "\n");
+    }
   });
   fileData += ('\n</urlset>');
 
