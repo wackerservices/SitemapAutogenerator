@@ -125,11 +125,13 @@ function rewriteBaseRoot(indexToBeginRewrite, previousIndex, previousBaseRoot, p
 }
 
 function writeToFile() {
-  let changeFrequency, priority; // Look for custom values for 'changeFrequency' and 'defaultPriorityValue' in environment.js
+  let changeFrequency, priority, showLog; // Look for custom values for 'changeFrequency' and 'defaultPriorityValue' in environment.js
   if (ENV()["sitemap-autogenerator"].changeFrequency !== undefined) changeFrequency = ENV()["sitemap-autogenerator"].changeFrequency;
   else changeFrequency = "daily";
   if (ENV()["sitemap-autogenerator"].defaultPriorityValue !== undefined) priority = ENV()["sitemap-autogenerator"].defaultPriorityValue;
   else priority = "0.5";
+  if (ENV()["sitemap-autogenerator"].showLog !== undefined && ENV()["sitemap-autogenerator"].showLog === true) showLog = true;
+  else showLog = false;
 
   routeArray.map(function (x, i) {
     if (i == 0) fileData += header; // Write the header
@@ -145,11 +147,11 @@ function writeToFile() {
       else writeToFileSwitch(3, i); // Scenario 3: there is a baseRoot, but no additional nested baseRoots
   
       if (ENV()["sitemap-autogenerator"].customPriority[currentPath] !== undefined) priority = ENV()["sitemap-autogenerator"].customPriority[currentPath];
-      console.log(currentPath);
+      if (showLog === true) console.log(currentPath);
 
       fileData += ('</loc>\n    <lastmod>' + formatDate(currentDate) + '</lastmod>\n    <changefreq>' + changeFrequency + '</changefreq>\n    <priority>' + priority + '</priority>\n  </url>');
     } else {
-      console.log("\n** Ignored route: ", currentPath + "\n");
+      if (showLog === true) console.log("** Ignored route: ", currentPath);
     }
   });
   fileData += ('\n</urlset>');

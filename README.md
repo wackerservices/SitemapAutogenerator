@@ -27,15 +27,16 @@ To install simply run:
     ...
     
     ENV['sitemap-autogenerator'] = {
-    changeFrequency: 'weekly', // Optional (if not included in ENV, default value is 'daily')
-    defaultPriorityValue: '0.3', // Optional (if not included in ENV, default value is '0.5')
-    ignore: { // Optional (if not included in ENV, all routes will be included in sitemap.xml except those with path "*"
+    changeFrequency: 'weekly', // Optional (if not included, default value is 'daily')
+    defaultPriorityValue: '0.3', // Optional (if not included, default value is '0.5')
+    showLog: true, // Optional (if not included, default value is false)
+    ignore: { // Optional (if not included, all routes will be included in sitemap.xml except those with path "*"
       'contact-us': 'contact-us',
       'contact': 'contact',
       'algorithmictradedeveloper': 'algorithmictradedeveloper',
       'careers': 'careers'
     },
-    customPriority: { // Optional (if not included in ENV, all values will be the default value '0.5')
+    customPriority: { // Optional (if not included, all values will be the default value '0.5')
       'fpgaengineer': '0.2',
       'systemapplicationdeveloper': '0.9',
       'general': '0.7',
