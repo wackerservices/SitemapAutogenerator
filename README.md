@@ -29,7 +29,7 @@ To install simply run:
     ENV['sitemap-autogenerator'] = {
     changeFrequency: 'weekly', // Optional (if not included in ENV, default value is 'daily')
     defaultPriorityValue: '0.3', // Optional (if not included in ENV, default value is '0.5')
-    ignore: { // Optional (if not included in ENV, all routes will be included in sitemap.xml except path "*"
+    ignore: { // Optional (if not included in ENV, all routes will be included in sitemap.xml except those with path "*"
       'contact-us': 'contact-us',
       'contact': 'contact',
       'algorithmictradedeveloper': 'algorithmictradedeveloper',
@@ -59,7 +59,6 @@ To install simply run:
 ## Current Limitations
 
 * Route autogeneration is limited to nested routes up to two deep: `<BASE_ROUTE>/<FIRST_SEGMENT>/<SECOND_SEGMENT>`
-* All routes will be added to **sitemap.xml** with the exception of any route with path "*".
 * Routes with dynamic segments, ie "/artist/:artist_id", are not yet supported.
 * The sitemap-autogenerator is limited to basic XML sitemaps and cannot currently manage image and video file information for resources on a page.
 * **sitemap-autogenerator** assumes you use the following standard Ember file structure: `app/dist/sitemap.xml` 
