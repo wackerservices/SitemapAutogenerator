@@ -28,18 +28,18 @@ To install simply run:
   The following tags are optional:
   - `<lastmod>` The date of last modification of the file.
   - `<changefreq>` How frequently the page is likely to change. This value provides general information to search engines and may not correlate exactly to how often they crawl the page. Valid values are:
-    - always
+    - always The value "always" should be used to describe documents that change each time they are accessed.
     - hourly
     - daily
     - weekly
     - monthly
     - yearly
     - never
-  The value "always" should be used to describe documents that change each time they are accessed.
   - `<priority>`
   The priority of this URL relative to other URLs on your site. Valid values range from 0.0 to 1.0. This value does not affect how your pages are compared to pages on other sites—it only lets the search engines know which pages you deem most important for the crawlers. The default priority of a page is 0.5.
-  
-  Custom values for `changeFrequency` and `defaultPriorityValue`, as well as routes to `ignoreTheseRoutes` and `customPriority` values are optional.
+
+## `environment.js`  
+  Below is an example of how to customize items such as Custom values for `changeFrequency` and `defaultPriorityValue`, as well as routes to `ignoreTheseRoutes` and `customPriority` values are optional.
   
 `changeFrequency` is an optional key/value pair, where the possible options are a `string`:
 - always
@@ -54,7 +54,7 @@ If `changeFrequency` is not specified in your `environment.js` file, the default
 
 `defaultPriorityValue` is an optional key/value pair, where the possible options are a `string` from `0.0` to `1.0`. If `defaultPriorityValue` is not specified in your `environment.js` file, the default value will be `0.5`.
 
-`ignoreTheseRoutes` is an optional object where each key/value pair is the name of a route you would like to be omitted from your `sitemap.xml`. If your complete URL is `https://mysite.com/contact` and you would like to omit `contact` from your `sitemap.xml`, you would include the following in `ignoreTheseRoutes: { 'contact': 'contact' }`. If `ignoreTheseRoutes` is omitted, then all routes except for those with the path `"*"` will be added to your `sitemap.xml`.
+`ignoreTheseRoutes` is an optional object where each key/value pair is the name of a route you would like to be omitted from your `sitemap.xml`. If your complete URL is `https://mysite.com/contact` and you would like to omit `contact` from your `sitemap.xml`, you would include the following in `ignoreTheseRoutes: { 'contact': true }`. If `ignoreTheseRoutes` is omitted, then all routes except for those with the path `"*"` will be added to your `sitemap.xml`.
 
 `customPriority` is an optional object where each key/value pair where the key is the name of a route and the value is a string specifying a particular `priority` for this route, from `0.0` to `1.0`. If `customPriority` is omitted, then all routes will be assigned a priority of `0.5` by default.
   
@@ -68,10 +68,10 @@ Please add these to your environment.js file as shown in the example below
     changeFrequency: 'weekly', // Optional (if not included in ENV, default value is 'daily')
     defaultPriorityValue: '0.3', // Optional (if not included in ENV, default value is '0.5')
     ignoreTheseRoutes: { // Optional (if not included in ENV, all routes will be included in sitemap.xml except those with path "*"
-      'contact-us': 'contact-us',
-      'contact': 'contact',
-      'algorithmictradedeveloper': 'algorithmictradedeveloper',
-      'careers': 'careers'
+      'contact-us': true,
+      'contact': true,
+      'algorithmictradedeveloper': true,
+      'careers': true
     },
     customPriority: { // Optional (if not included in ENV, all values will be the default value '0.5')
       'fpgaengineer': '0.2',
