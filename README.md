@@ -2,7 +2,8 @@
 
 The **Beta** version of an Ember AddOn for ember-cli that auto-generates a [sitemap.xml](https://support.google.com/webmasters/answer/183668?hl=en&ref_topic=4581190) file and adds it to the project.
 
-## Installation
+Installation
+------------------------------------------------------------------------------
 
 To install simply run:
 
@@ -53,15 +54,22 @@ To install simply run:
 </urlset>
 ```
 
-## Running Tests
+### Running tests
 
 * `git clone git@github.com:wackerservices/SitemapAutogenerator.git` this repository
 * `npm test` (Runs `ember try:each` to test your addon against multiple Ember versions)
-* `ember test`
-* `ember test --server`
+* `ember test` – Runs the test suite on the current Ember version
+* `ember test --server` – Runs the test suite in "watch mode"
+* `ember try:each` – Runs the test suite against multiple Ember versions
 
-## Building
+### Running the dummy application
 
-* `ember build`
+* `ember serve`
+* Visit the dummy application at [http://localhost:4200](http://localhost:4200).
 
 For more information on using ember-cli, visit [https://ember-cli.com/](https://ember-cli.com/).
+
+License
+------------------------------------------------------------------------------
+
+This project is licensed under the [MIT License](LICENSE.md).
