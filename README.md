@@ -20,7 +20,7 @@ To install simply run:
 
   Be sure to not have a trailing `/` after `<YOUR SITE ROOT URL>` or else you will get double `//` in your generated **sitemap.xml**
   
-  Custom values for changeFrequency and defaultPriorityValue, as well as routes to ignore and customPriority values are optional.  Please add these to your environment.js file as shown in the example below
+  Custom values for `changeFrequency` and `defaultPriorityValue`, as well as routes to `ignore` and `customPriority` values are optional.  Please add these to your environment.js file as shown in the example below
   
   ```js
     <!-- environment.js -->
@@ -98,4 +98,3 @@ License
 ------------------------------------------------------------------------------
 
 This project is licensed under the [MIT License](LICENSE.md).
-t
