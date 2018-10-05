@@ -140,7 +140,7 @@ function writeToFile() {
     let currentPath = routeArray[i].path;
 
     currentPath = currentPath.replace(regex, '');
-    if (ENV()["sitemap-autogenerator"].ignore[currentPath] === undefined) {
+    if (ENV()["sitemap-autogenerator"].ignoreTheseRoutes[currentPath] === undefined) {
       fileData += ('\n  <url>\n    <loc>');
       if (routeArray[i].baseRoot == undefined) writeToFileSwitch(1, i); // Scenario 1: baseRoot is undefined
       else if (routeArray[i].baseRoot2) writeToFileSwitch(2, i); // Scenario 2: baseRoot[X] exists
@@ -151,7 +151,7 @@ function writeToFile() {
 
       fileData += ('</loc>\n    <lastmod>' + formatDate(currentDate) + '</lastmod>\n    <changefreq>' + changeFrequency + '</changefreq>\n    <priority>' + priority + '</priority>\n  </url>');
     } else {
-      if (showLog === true) console.log("** Ignored route: ", currentPath);
+      if (showLog === true) console.log("** Ignored route:", currentPath);
     }
   });
   fileData += ('\n</urlset>');

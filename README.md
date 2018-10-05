@@ -20,23 +20,60 @@ To install simply run:
 
   Be sure to not have a trailing `/` after `<YOUR SITE ROOT URL>` or else you will get double `//` in your generated **sitemap.xml**
   
-  Custom values for `changeFrequency` and `defaultPriorityValue`, as well as routes to `ignore` and `customPriority` values are optional.  Please add these to your environment.js file as shown in the example below
+  The [Sitemap protocol](https://www.sitemaps.org/protocol.html) consists of XML tags and must have the following tags:
+  - `<urlset>` Encapsulates the file and references the current protocol standard.
+  - `<url>` Parent tag for each URL entry. The remaining tags are children of this tag.
+  - `<loc>` URL of the page. This URL must begin with the protocol (such as http) and end with a trailing slash, if your web server requires it. This value must be less than 2,048 characters. 
+
+  The following tags are optional:
+  - `<lastmod>` The date of last modification of the file.
+  - `<changefreq>` How frequently the page is likely to change. This value provides general information to search engines and may not correlate exactly to how often they crawl the page. Valid values are:
+    - always
+    - hourly
+    - daily
+    - weekly
+    - monthly
+    - yearly
+    - never
+  The value "always" should be used to describe documents that change each time they are accessed.
+  - `<priority>`
+  The priority of this URL relative to other URLs on your site. Valid values range from 0.0 to 1.0. This value does not affect how your pages are compared to pages on other sites—it only lets the search engines know which pages you deem most important for the crawlers. The default priority of a page is 0.5.
+  
+  Custom values for `changeFrequency` and `defaultPriorityValue`, as well as routes to `ignoreTheseRoutes` and `customPriority` values are optional.
+  
+`changeFrequency` is an optional key/value pair, where the possible options are a `string`:
+- always
+- hourly
+- daily
+- weekly
+- monthly
+- yearly
+- never
+
+If `changeFrequency` is not specified in your `environment.js` file, the default value will be `daily`.
+
+`defaultPriorityValue` is an optional key/value pair, where the possible options are a `string` from `0.0` to `1.0`. If `defaultPriorityValue` is not specified in your `environment.js` file, the default value will be `0.5`.
+
+`ignoreTheseRoutes` is an optional object where each key/value pair is the name of a route you would like to be omitted from your `sitemap.xml`. If your complete URL is `https://mysite.com/contact` and you would like to omit `contact` from your `sitemap.xml`, you would include the following in `ignoreTheseRoutes: { 'contact': 'contact' }`. If `ignoreTheseRoutes` is omitted, then all routes except for those with the path `"*"` will be added to your `sitemap.xml`.
+
+`customPriority` is an optional object where each key/value pair where the key is the name of a route and the value is a string specifying a particular `priority` for this route, from `0.0` to `1.0`. If `customPriority` is omitted, then all routes will be assigned a priority of `0.5` by default.
+  
+Please add these to your environment.js file as shown in the example below
   
   ```js
     <!-- environment.js -->
     ...
     
     ENV['sitemap-autogenerator'] = {
-    changeFrequency: 'weekly', // Optional (if not included, default value is 'daily')
-    defaultPriorityValue: '0.3', // Optional (if not included, default value is '0.5')
-    showLog: true, // Optional (if not included, default value is false)
-    ignore: { // Optional (if not included, all routes will be included in sitemap.xml except those with path "*"
+    changeFrequency: 'weekly', // Optional (if not included in ENV, default value is 'daily')
+    defaultPriorityValue: '0.3', // Optional (if not included in ENV, default value is '0.5')
+    ignoreTheseRoutes: { // Optional (if not included in ENV, all routes will be included in sitemap.xml except those with path "*"
       'contact-us': 'contact-us',
       'contact': 'contact',
       'algorithmictradedeveloper': 'algorithmictradedeveloper',
       'careers': 'careers'
     },
-    customPriority: { // Optional (if not included, all values will be the default value '0.5')
+    customPriority: { // Optional (if not included in ENV, all values will be the default value '0.5')
       'fpgaengineer': '0.2',
       'systemapplicationdeveloper': '0.9',
       'general': '0.7',
@@ -60,8 +97,9 @@ To install simply run:
 ## Current Limitations
 
 * Route autogeneration is limited to nested routes up to two deep: `<BASE_ROUTE>/<FIRST_SEGMENT>/<SECOND_SEGMENT>`
+* All routes will be added to **sitemap.xml** with the exception of any route with path "*".
 * Routes with dynamic segments, ie "/artist/:artist_id", are not yet supported.
-* The sitemap-autogenerator is limited to basic XML sitemaps and cannot currently manage image and video file information for resources on a page.
+* The sitemap-autogenerator is limited to basic XML sitemaps and cannot currently manage image and video file information for resources on a page or rich media content.
 * **sitemap-autogenerator** assumes you use the following standard Ember file structure: `app/dist/sitemap.xml` 
 
 ## Example of Output
