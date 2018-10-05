@@ -20,6 +20,32 @@ To install simply run:
 
   Be sure to not have a trailing `/` after `<YOUR SITE ROOT URL>` or else you will get double `//` in your generated **sitemap.xml**
   
+  Custom values for changeFrequency and defaultPriorityValue, as well as routes to ignore and customPriority values are optional.  Please add these to your environment.js file as shown in the example below
+  
+  ```js
+    <!-- environment.js -->
+    ...
+    
+    ENV['sitemap-autogenerator'] = {
+    changeFrequency: 'weekly', // Optional (if not included in ENV, default value is 'daily')
+    defaultPriorityValue: '0.3', // Optional (if not included in ENV, default value is '0.5')
+    ignore: { // Optional (if not included in ENV, all routes will be included in sitemap.xml except path "*"
+      'contact-us': 'contact-us',
+      'contact': 'contact',
+      'algorithmictradedeveloper': 'algorithmictradedeveloper',
+      'careers': 'careers'
+    },
+    customPriority: { // Optional (if not included in ENV, all values will be the default value '0.5')
+      'fpgaengineer': '0.2',
+      'systemapplicationdeveloper': '0.9',
+      'general': '0.7',
+      'coresoftwaredeveloper': '0.8'
+    }
+    
+    ...
+  }
+  ```
+  
   `sitemap-autogenerator` will run at the end of each Ember build, which are run with: `npm run build`
   
   Alternatively, you can place the above script as a `"poststart"` hook in your **package.json** file and test that a **sitemap.xml** file is created when you stop `ember s`. 
@@ -36,7 +62,6 @@ To install simply run:
 * All routes will be added to **sitemap.xml** with the exception of any route with path "*".
 * Routes with dynamic segments, ie "/artist/:artist_id", are not yet supported.
 * The sitemap-autogenerator is limited to basic XML sitemaps and cannot currently manage image and video file information for resources on a page.
-* There is no way to currently assign custom ```<priority>``` values for specific routes.
 * **sitemap-autogenerator** assumes you use the following standard Ember file structure: `app/dist/sitemap.xml` 
 
 ## Example of Output
@@ -73,3 +98,4 @@ License
 ------------------------------------------------------------------------------
 
 This project is licensed under the [MIT License](LICENSE.md).
+t
