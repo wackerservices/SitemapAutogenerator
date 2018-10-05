@@ -54,7 +54,7 @@ If `changeFrequency` is not specified in your `environment.js` file, the default
 
 `defaultPriorityValue` is an optional key/value pair, where the possible options are a `string` from `0.0` to `1.0`. If `defaultPriorityValue` is not specified in your `environment.js` file, the default value will be `0.5`.
 
-`ignoreTheseRoutes` is an optional object where each key/value pair is the name of a route you would like to be omitted from your `sitemap.xml`. If your complete URL is `https://mysite.com/contact` and you would like to omit `contact` from your `sitemap.xml`, you would include the following in `ignoreTheseRoutes: { 'contact': true }`. If `ignoreTheseRoutes` is omitted, then all routes except for those with the path `"*"` will be added to your `sitemap.xml`.
+`ignoreTheseRoutes` is an optional object where each key/value pair is the name of a route you would like to be omitted from your `sitemap.xml` and the value must be `true`. To avoid confusion, this may be the route from your Ember app or the path by which you reach this route. If your complete URL is `https://mysite.com/contact` and you would like to omit `contact` from your `sitemap.xml`, you would include the following in `ignoreTheseRoutes: { 'contact': true }`. If `ignoreTheseRoutes` is omitted, then all routes except for those with the path `"*"` will be added to your `sitemap.xml`.
 
 `customPriority` is an optional object where each key/value pair where the key is the name of a route and the value is a string specifying a particular `priority` for this route, from `0.0` to `1.0`. If `customPriority` is omitted, then all routes will be assigned a priority of `0.5` by default.
   
