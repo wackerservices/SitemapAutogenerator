@@ -126,12 +126,19 @@ function rewriteBaseRoot(indexToBeginRewrite, previousIndex, previousBaseRoot, p
 
 function writeToFile() {
   let changeFrequency, priority, showLog; // Look for custom values for 'changeFrequency' and 'defaultPriorityValue' in environment.js
-  if (ENV()["sitemap-autogenerator"].changeFrequency !== undefined) changeFrequency = ENV()["sitemap-autogenerator"].changeFrequency;
-  else changeFrequency = "daily";
-  if (ENV()["sitemap-autogenerator"].defaultPriorityValue !== undefined) priority = ENV()["sitemap-autogenerator"].defaultPriorityValue;
-  else priority = "0.5";
-  if (ENV()["sitemap-autogenerator"].showLog !== undefined && ENV()["sitemap-autogenerator"].showLog === true) showLog = true;
-  else showLog = false;
+  if (ENV()["sitemap-autogenerator"] !== undefined) { // Check to see if user has created ENV "sitemap-autogenerator" in environment.js
+    if (ENV()["sitemap-autogenerator"].changeFrequency !== undefined) changeFrequency = ENV()["sitemap-autogenerator"].changeFrequency;
+    else changeFrequency = "daily";
+    if (ENV()["sitemap-autogenerator"].defaultPriorityValue !== undefined) priority = ENV()["sitemap-autogenerator"].defaultPriorityValue;
+    else priority = "0.5";
+    if (ENV()["sitemap-autogenerator"].showLog !== undefined && ENV()["sitemap-autogenerator"].showLog === true) showLog = true;
+    else showLog = false;
+  } else {
+    console.log("\n! It looks like sitemap-autogenerator is installed but not properly configured. A default sitemap.xml will be created.\n! Please refer to the documentation regarding adding 'sitemap-autogenerator' to your ENV in environment.js file: https://www.npmjs.com/package/sitemap-autogenerator");
+    changeFrequency = "daily";
+    priority = "0.5";
+    showLog = false;
+  }
 
   routeArray.map(function (x, i) {
     if (i == 0) fileData += header; // Write the header
@@ -140,13 +147,13 @@ function writeToFile() {
     let currentPath = routeArray[i].path;
 
     currentPath = currentPath.replace(regex, '');
-    if (ENV()["sitemap-autogenerator"].ignoreTheseRoutes[currentPath] === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes[currentPath] !== true) {
+    if (ENV()["sitemap-autogenerator"] === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes[currentPath] === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes[currentPath] !== true) {
       fileData += ('\n  <url>\n    <loc>');
       if (routeArray[i].baseRoot == undefined) writeToFileSwitch(1, i); // Scenario 1: baseRoot is undefined
       else if (routeArray[i].baseRoot2) writeToFileSwitch(2, i); // Scenario 2: baseRoot[X] exists
       else writeToFileSwitch(3, i); // Scenario 3: there is a baseRoot, but no additional nested baseRoots
   
-      if (ENV()["sitemap-autogenerator"].customPriority[currentPath] !== undefined) priority = ENV()["sitemap-autogenerator"].customPriority[currentPath];
+      if (ENV()["sitemap-autogenerator"] !== undefined && ENV()["sitemap-autogenerator"].customPriority !== undefined && ENV()["sitemap-autogenerator"].customPriority[currentPath] !== undefined) priority = ENV()["sitemap-autogenerator"].customPriority[currentPath];
       if (showLog === true) console.log(currentPath);
 
       fileData += ('</loc>\n    <lastmod>' + formatDate(currentDate) + '</lastmod>\n    <changefreq>' + changeFrequency + '</changefreq>\n    <priority>' + priority + '</priority>\n  </url>');
