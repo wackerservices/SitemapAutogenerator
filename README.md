@@ -99,8 +99,6 @@ Please add these to your environment.js file as shown in the example below
 
 ## Current Limitations
 
-* Route autogeneration is limited to nested routes up to two deep: `<BASE_ROUTE>/<FIRST_SEGMENT>/<SECOND_SEGMENT>`
-* All routes will be added to **sitemap.xml** with the exception of any route with path "*".
 * Routes with dynamic segments, ie "/artist/:artist_id", are not yet supported.
 * The sitemap-autogenerator is limited to basic XML sitemaps and cannot currently manage image and video file information for resources on a page or rich media content.
 * **sitemap-autogenerator** assumes you use the following standard Ember file structure: `app/dist/sitemap.xml` 
