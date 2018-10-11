@@ -128,7 +128,7 @@ function writeToFile() {
 
       if (ENV()["sitemap-autogenerator"] !== undefined && ENV()["sitemap-autogenerator"].customPriority !== undefined && ENV()["sitemap-autogenerator"].customPriority[currentPath] !== undefined) currentPriority = ENV()["sitemap-autogenerator"].customPriority[currentPath];
 
-      fileData += ('</loc>\n    <lastmod>' + formatDate(currentDate) + '</lastmod>\n    <changefreq>' + changeFrequency + '</changefreq>\n    <priority>' + currentPriority + '</priority>\n  </url>');
+      fileData += ('</loc>\n    <lastmod>' + formatDate() + '</lastmod>\n    <changefreq>' + changeFrequency + '</changefreq>\n    <priority>' + currentPriority + '</priority>\n  </url>');
     } else {
       let isIgnored = true;
       writeToFileData(i, showLog, isIgnored);
@@ -164,7 +164,7 @@ function writeToFileData(i, showLog, isIgnored) {
   else if (showLog === true && isIgnored === true) console.log(isIgnoredMessage, pathString);
 }
 
-function formatDate(dateObject) {
+function formatDate() {
   let date, year, month, day;
   day = currentDate.getDate(), month = currentDate.getMonth() + 1, year = currentDate.getFullYear();
   if (day < 10) day = '0' + day;
