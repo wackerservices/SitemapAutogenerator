@@ -52,7 +52,7 @@ To install simply run:
 
 If `changeFrequency` is not specified in your `environment.js` file, the default value will be `daily`.
 
-`showLog` is an optional key/value pair, where the possible options are `true` or `false`. If `showLog` is not specified in your `environment.js` file, the default value will be `false`.
+`showLog` is an optional key/value pair, where the possible options are `true` or `false`. If `showLog` is not specified in your `environment.js` file, the default value will be `false`. If set to `true`, `showLog` displays log information regarding which routes/paths are added or ignored in your `sitemap-autogenerator` generated `sitemap.xml` file. 
 
 `defaultPriorityValue` is an optional key/value pair, where the possible options are a `string` from `0.0` to `1.0`. If `defaultPriorityValue` is not specified in your `environment.js` file, the default value will be `0.5`.
 
