@@ -52,6 +52,8 @@ To install simply run:
 
 If `changeFrequency` is not specified in your `environment.js` file, the default value will be `daily`.
 
+`showLog` is an optional key/value pair, where the possible options are `true` or `false`. If `showLog` is not specified in your `environment.js` file, the default value will be `false`.
+
 `defaultPriorityValue` is an optional key/value pair, where the possible options are a `string` from `0.0` to `1.0`. If `defaultPriorityValue` is not specified in your `environment.js` file, the default value will be `0.5`.
 
 `ignoreTheseRoutes` is an optional object where each key/value pair is the name of a route you would like to be omitted from your `sitemap.xml` and the value must be `true`. To avoid confusion, this may be the route from your Ember app or the path by which you reach this route. If your complete URL is `https://mysite.com/contact` and you would like to omit `contact` from your `sitemap.xml`, you would include the following in `ignoreTheseRoutes: { 'contact': true }`. If `ignoreTheseRoutes` is omitted, then all routes except for those with the path `"*"` will be added to your `sitemap.xml`.
@@ -67,6 +69,7 @@ Please add these to your environment.js file as shown in the example below
     ENV['sitemap-autogenerator'] = {
     changeFrequency: 'weekly', // Optional (if not included in ENV, default value is 'daily')
     defaultPriorityValue: '0.3', // Optional (if not included in ENV, default value is '0.5')
+    showLog: true,
     ignoreTheseRoutes: { // Optional (if not included in ENV, all routes will be included in sitemap.xml except those with path "*"
       'contact-us': true,
       'contact': true,
