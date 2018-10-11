@@ -145,20 +145,25 @@ function writeToFile() {
 
     var regex = /\//g;
     let currentPath = routeArray[i].path;
+    let currentPriority = priority;
 
     currentPath = currentPath.replace(regex, '');
     if (ENV()["sitemap-autogenerator"] === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes[currentPath] === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes[currentPath] !== true) {
+      let isIgnored = false;
       fileData += ('\n  <url>\n    <loc>');
-      if (routeArray[i].baseRoot == undefined) writeToFileSwitch(1, i); // Scenario 1: baseRoot is undefined
-      else if (routeArray[i].baseRoot2) writeToFileSwitch(2, i); // Scenario 2: baseRoot[X] exists
-      else writeToFileSwitch(3, i); // Scenario 3: there is a baseRoot, but no additional nested baseRoots
+      if (routeArray[i].baseRoot == undefined) writeToFileSwitch(1, i, showLog, isIgnored); // Scenario 1: baseRoot is undefined
+      else if (routeArray[i].baseRoot2) writeToFileSwitch(2, i, showLog, isIgnored); // Scenario 2: baseRoot[X] exists
+      else writeToFileSwitch(3, i, showLog, isIgnored); // Scenario 3: there is a baseRoot, but no additional nested baseRoots
   
-      if (ENV()["sitemap-autogenerator"] !== undefined && ENV()["sitemap-autogenerator"].customPriority !== undefined && ENV()["sitemap-autogenerator"].customPriority[currentPath] !== undefined) priority = ENV()["sitemap-autogenerator"].customPriority[currentPath];
-      if (showLog === true) console.log(currentPath);
+      if (ENV()["sitemap-autogenerator"] !== undefined && ENV()["sitemap-autogenerator"].customPriority !== undefined && ENV()["sitemap-autogenerator"].customPriority[currentPath] !== undefined) currentPriority = ENV()["sitemap-autogenerator"].customPriority[currentPath];
 
-      fileData += ('</loc>\n    <lastmod>' + formatDate(currentDate) + '</lastmod>\n    <changefreq>' + changeFrequency + '</changefreq>\n    <priority>' + priority + '</priority>\n  </url>');
+      fileData += ('</loc>\n    <lastmod>' + formatDate(currentDate) + '</lastmod>\n    <changefreq>' + changeFrequency + '</changefreq>\n    <priority>' + currentPriority + '</priority>\n  </url>');
     } else {
-      if (showLog === true) console.log("** Ignored route:", currentPath);
+      let isIgnored = true;
+      if (routeArray[i].baseRoot == undefined) writeToFileSwitch(1, i, showLog, isIgnored); // Scenario 1: baseRoot is undefined
+      else if (routeArray[i].baseRoot2) writeToFileSwitch(2, i, showLog, isIgnored); // Scenario 2: baseRoot[X] exists
+      else writeToFileSwitch(3, i, showLog, isIgnored); // Scenario 3: there is a baseRoot, but no additional nested baseRoots
+      // if (showLog === true) console.log("** Ignored route:", currentPath);
     }
   });
   fileData += ('\n</urlset>');
@@ -171,29 +176,42 @@ function writeToFile() {
   });
 }
 
-function writeToFileSwitch(scenario, i) {
+function writeToFileSwitch(scenario, i, showLog, isIgnored) {
+  let isIgnoredMessage = '** Ignored path:';
   if (routeArray[i].path !== '/' && !routeArray[i].path.match(/\//g) && !routeArray[i].path.match(/\:/g)) {
     switch (scenario) {
       case 1:
-        fileData += (baseURL + '/' + routeArray[i].path);
+        if (isIgnored === false) fileData += (baseURL + '/' + routeArray[i].path);
+        if (showLog === true && isIgnored === false) console.log(baseURL + '/' + routeArray[i].path);
+        else if (showLog === true && isIgnored === true) console.log(isIgnoredMessage, baseURL + '/' + routeArray[i].path);
         break;
       case 2:
-        fileData += (baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].baseRoot2 + '/' + routeArray[i].path);
+        if (isIgnored === false) fileData += (baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].baseRoot2 + '/' + routeArray[i].path);
+        if (showLog === true && isIgnored === false) console.log(baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].baseRoot2 + '/' + routeArray[i].path);
+        else if (showLog === true && isIgnored === true) console.log(isIgnoredMessage, baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].baseRoot2 + '/' + routeArray[i].path);
         break;
       case 3:
-        fileData += (baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].path);
+        if (isIgnored === false) fileData += (baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].path);
+        if (showLog === true && isIgnored === false) console.log(baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].path);
+        else if (showLog === true && isIgnored === true) console.log(isIgnoredMessage, baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].path);
         break;
     }
   } else if (!routeArray[i].path.match(/\:/g)) {
     switch (scenario) {
       case 1:
-        fileData += (baseURL + routeArray[i].path);
+        if (isIgnored === false) fileData += (baseURL + routeArray[i].path);
+        if (showLog === true && isIgnored === false) console.log(baseURL + routeArray[i].path);
+        else if (showLog === true && isIgnored === true) console.log(isIgnoredMessage, baseURL + routeArray[i].path);
         break;
       case 2:
-        fileData += (baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].baseRoot2 + routeArray[i].path);
+        if (isIgnored === false) fileData += (baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].baseRoot2 + routeArray[i].path);
+        if (showLog === true && isIgnored === false) console.log(baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].baseRoot2 + routeArray[i].path);
+        else if (showLog === true && isIgnored === true) console.log(isIgnoredMessage, baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].baseRoot2 + routeArray[i].path);
         break;
       case 3:
-        fileData += (baseURL + '/' + routeArray[i].baseRoot + routeArray[i].path);
+        if (isIgnored === false) fileData += (baseURL + '/' + routeArray[i].baseRoot + routeArray[i].path);
+        if (showLog === true && isIgnored === false) console.log(baseURL + '/' + routeArray[i].baseRoot + routeArray[i].path);
+        else if (showLog === true && isIgnored === true) console.log(isIgnoredMessage, baseURL + '/' + routeArray[i].baseRoot + routeArray[i].path);
         break;
     }
   }
