@@ -4,9 +4,7 @@ var ENV = require(process.cwd() + '/config/environment');
 const fs = require('fs');
 
 var baseURL;
-
 const pathForRouterJS = 'app/router.js';
-
 var routeArray = [];
 var fileData = '';
 const currentDate = new Date();
@@ -29,6 +27,7 @@ module.exports = {
   },
 
   // Is this needed anymore?
+  /*
   locals: function (options) {
     fs.readFile(pathForRouterJS, 'utf8', function (err, data) {
       if (err) return console.log('Encountered the following error:', err);
@@ -43,6 +42,7 @@ module.exports = {
   },
 
   afterInstall(options) {}
+  */
 };
 
 function splitDataIntoArrayOfRoutes(data) {
@@ -52,20 +52,20 @@ function splitDataIntoArrayOfRoutes(data) {
 
   testRE.map(function (x, i) { // x is current value, i is index, optional third parameter is the enter array
     if (!testRE[i].match(/\*/g) && !testRE[i].match(/\/\:/)) { // Exclude any route with ':' in the path (for route variable) and any route with '*' in the path
-      console.log(testRE[i]);
+      // console.log(testRE[i]);
 
       if (testRE[i].match(/\s*function\s*\(\)\s*\{/)) {
         nestedPath.push(checkForQuoteType(testRE[i]));
-        console.log('*** ', nestedPath);
+        // console.log('*** ', nestedPath);
         let routeAfterNewNest = testRE[i].split(/\s*function\s*\(\)\s*\{/);
         routeArray.push({
           completeRoute: combineAllPaths(nestedPath),
           path: parseRouteName(testRE[i]),
         });
-        console.log(routeAfterNewNest[1]);
+        // console.log(routeAfterNewNest[1]);
       } else if (!testRE[i].match(/path\:/) && testRE[i].match(/\s*\}\)\;\s*/)) { // Remove nestedPath from array if end of code block
         nestedPath.pop();
-        console.log('--- ', nestedPath);
+        // console.log('--- ', nestedPath);
       } else {
         routeArray.push({
           completeRoute: combineAllPaths(nestedPath),
@@ -75,7 +75,7 @@ function splitDataIntoArrayOfRoutes(data) {
     }
   });
 
-  console.log(routeArray);
+  // console.log(routeArray);
   writeToFile();
 }
 
