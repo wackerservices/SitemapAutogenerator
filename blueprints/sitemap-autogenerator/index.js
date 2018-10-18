@@ -38,7 +38,7 @@ module.exports = {
 
       if (routerFound === false) console.log('!!! sitemap-autogenerator could not find a Router object in your ember router.js file, process aborted!');
       else {
-        console.log(routeArray);
+        // console.log(routeArray);
         writeToFile();
       }
     });
@@ -46,8 +46,8 @@ module.exports = {
 };
 
 function processPath(path, message) {
-  if (!path.match(/\*/g)) { // Exclude any route with '*' in the path
-    console.log(message, path);
+  if (!path.match(/\*/g) && !path.match(/\/\:/)) { // Exclude any route with ':' in the path (for route variable) and any route with '*' in the path
+    // console.log(message, path);
     routeArray.push({
       completeRoute: combineAllPaths(nestedPath),
       path: checkForQuoteType(path)
@@ -64,14 +64,14 @@ function isSingleOrNestedRoute(itemExpressionArgument) {
     } else {
       if (itemExpressionArgument[1].type === "FunctionExpression") {
         nestedPath.push(itemExpressionArgument[0].value);
-        console.log('*** +++ Found a nested function with nested path name ->', itemExpressionArgument[0].value);
-        console.log('nestedPath:', nestedPath);
+        // console.log('*** +++ Found a nested function with nested path name ->', itemExpressionArgument[0].value);
+        // console.log('nestedPath:', nestedPath);
         let itemExpressionArgumentToRecurse = itemExpressionArgument[1].body.body;
         itemExpressionArgumentToRecurse.map(function (item, index) {
           isSingleOrNestedRoute(item);
           if (index === itemExpressionArgumentToRecurse.length - 1) {
             nestedPath.pop();
-            console.log('nestedPath:', nestedPath);
+            // console.log('nestedPath:', nestedPath);
           }
         });
       }
@@ -80,19 +80,19 @@ function isSingleOrNestedRoute(itemExpressionArgument) {
     if (itemExpressionArgument.expression.arguments.length === 1) {
       processPath(itemExpressionArgument.expression.arguments[0].value, '  *** It\'s a simple route, no nesting, and no specified path ->');
     } else if (itemExpressionArgument.expression.arguments.length === 2 && itemExpressionArgument.expression.arguments[1].properties !== undefined && itemExpressionArgument.expression.arguments[1].properties[0].key.name === "path") {
-      console.log('!!!', itemExpressionArgument.expression.arguments[1].properties[0].value.value);
+      // console.log('!!!', itemExpressionArgument.expression.arguments[1].properties[0].value.value);
       processPath(itemExpressionArgument.expression.arguments[1].properties[0].value.value, '  *** It\'s a simple route with a specified path ->');
     } else {
       if (itemExpressionArgument.expression.arguments[1].type === "FunctionExpression") {
         nestedPath.push(itemExpressionArgument.expression.arguments[0].value);
-        console.log('*** +++ Found a nested function with nested path name ->', itemExpressionArgument.expression.arguments[0].value);
-        console.log('nestedPath:', nestedPath);
+        // console.log('*** +++ Found a nested function with nested path name ->', itemExpressionArgument.expression.arguments[0].value);
+        // console.log('nestedPath:', nestedPath);
         let itemExpressionArgumentToRecurse = itemExpressionArgument.expression.arguments[1].body.body;
         itemExpressionArgumentToRecurse.map(function (item, index) {
           isSingleOrNestedRoute(item);
           if (index === itemExpressionArgumentToRecurse.length - 1) {
             nestedPath.pop();
-            console.log('nestedPath:', nestedPath);
+            // console.log('nestedPath:', nestedPath);
           }
         });
       }
