@@ -1,12 +1,18 @@
 /* eslint-env node */
+let acorn = require('acorn');
+
 var ENV = require(process.cwd() + '/config/environment');
 const fs = require('fs');
 
-var baseURL, fileData = '', routeArray = [];
+var baseURL, routerFound = false, fileData = '',
+  routeArray = [];
 
-const pathForRouterJS = 'app/router.js', currentDate = new Date();
+const pathForRouterJS = 'app/router.js',
+  currentDate = new Date();
 const header = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+let nestedPath = [];
 
 module.exports = {
   description: '',
@@ -15,38 +21,83 @@ module.exports = {
     fs.readFile(pathForRouterJS, 'utf8', function (err, data) {
       if (err) return console.log('Encountered the following error:', err);
 
-      let splitBy = /Router.map\(\s*function\s*\(\)\s*\{/; // Provision for variations in spacing for this line
-      data = data.split(splitBy)[1]; // Split file text into code lines by 'Router.map', resulting in two code chunks --> choose the chunk after 'Router.map'
+      let parseResults = acorn.parse(data, {
+        "sourceType": "module"
+      });
 
-      splitDataIntoArrayOfRoutes(data);
+      let arrayToMap = parseResults.body;
+      arrayToMap.map(function (item) { // Look for the Router object in the file -> i.e. Router.map(function()...
+        if (item.type === "ExpressionStatement" && item.expression.callee.object.name === "Router") {
+          routerFound = true;
+          let innerArrayToMap = item.expression.arguments[0].body.body;
+          innerArrayToMap.map(function (item) { // Look for each this.route in Router.map
+            isSingleOrNestedRoute(item.expression.arguments);
+          });
+        }
+      });
+
+      if (routerFound === false) console.log('!!! sitemap-autogenerator could not find a Router object in your ember router.js file, process aborted!');
+      else {
+        console.log(routeArray);
+        writeToFile();
+      }
     });
   },
 };
 
-function splitDataIntoArrayOfRoutes(data) {
-  let testRE = data.match(/this.route*?[\s\S]*?\;|  [\w\s]+\w*\}\)\;\w*[\s\S]*? | \}\)\;/g); // Looks for matches of this.route*, }); in a line, }); in the beginning of a line
-  let nestedPath = [];
+function processPath(path, message) {
+  if (!path.match(/\*/g)) { // Exclude any route with '*' in the path
+    console.log(message, path);
+    routeArray.push({
+      completeRoute: combineAllPaths(nestedPath),
+      path: checkForQuoteType(path)
+    });
+  }
+}
 
-  testRE.map(function (x, i) { // x is current value, i is index, optional third parameter is the enter array
-    if (!testRE[i].match(/\*/g) && !testRE[i].match(/\/\:/)) { // Exclude any route with ':' in the path (for route variable) and any route with '*' in the path
-
-      if (testRE[i].match(/\s*function\s*\(\)\s*\{/)) {
-        nestedPath.push(checkForQuoteType(testRE[i]));
-        routeArray.push({
-          completeRoute: combineAllPaths(nestedPath),
-          path: parseRouteName(testRE[i]),
-        });
-      } else if (!testRE[i].match(/path\:/) && testRE[i].match(/\s*\}\)\;\s*/)) { // Remove nestedPath from array if end of code block
-        nestedPath.pop();
-      } else {
-        routeArray.push({
-          completeRoute: combineAllPaths(nestedPath),
-          path: parseRouteName(testRE[i]),
+function isSingleOrNestedRoute(itemExpressionArgument) {
+  if (itemExpressionArgument.length !== undefined) {
+    if (itemExpressionArgument.length === 1) {
+      processPath(itemExpressionArgument[0].value, '*** It\'s a simple route, no nesting, and no specified path ->');
+    } else if (itemExpressionArgument.length === 2 && itemExpressionArgument[1].properties !== undefined && itemExpressionArgument[1].properties[0].key.name === "path") {
+      processPath(itemExpressionArgument[1].properties[0].value.value, '*** It\'s a simple route with a specified path ->')
+    } else {
+      if (itemExpressionArgument[1].type === "FunctionExpression") {
+        nestedPath.push(itemExpressionArgument[0].value);
+        console.log('*** +++ Found a nested function with nested path name ->', itemExpressionArgument[0].value);
+        console.log('nestedPath:', nestedPath);
+        let itemExpressionArgumentToRecurse = itemExpressionArgument[1].body.body;
+        itemExpressionArgumentToRecurse.map(function (item, index) {
+          isSingleOrNestedRoute(item);
+          if (index === itemExpressionArgumentToRecurse.length - 1) {
+            nestedPath.pop();
+            console.log('nestedPath:', nestedPath);
+          }
         });
       }
     }
-  });
-  writeToFile();
+  } else { // Necessary for recursed routes
+    if (itemExpressionArgument.expression.arguments.length === 1) {
+      processPath(itemExpressionArgument.expression.arguments[0].value, '  *** It\'s a simple route, no nesting, and no specified path ->');
+    } else if (itemExpressionArgument.expression.arguments.length === 2 && itemExpressionArgument.expression.arguments[1].properties !== undefined && itemExpressionArgument.expression.arguments[1].properties[0].key.name === "path") {
+      console.log('!!!', itemExpressionArgument.expression.arguments[1].properties[0].value.value);
+      processPath(itemExpressionArgument.expression.arguments[1].properties[0].value.value, '  *** It\'s a simple route with a specified path ->');
+    } else {
+      if (itemExpressionArgument.expression.arguments[1].type === "FunctionExpression") {
+        nestedPath.push(itemExpressionArgument.expression.arguments[0].value);
+        console.log('*** +++ Found a nested function with nested path name ->', itemExpressionArgument.expression.arguments[0].value);
+        console.log('nestedPath:', nestedPath);
+        let itemExpressionArgumentToRecurse = itemExpressionArgument.expression.arguments[1].body.body;
+        itemExpressionArgumentToRecurse.map(function (item, index) {
+          isSingleOrNestedRoute(item);
+          if (index === itemExpressionArgumentToRecurse.length - 1) {
+            nestedPath.pop();
+            console.log('nestedPath:', nestedPath);
+          }
+        });
+      }
+    }
+  }
 }
 
 function combineAllPaths(pathArray) {
@@ -56,14 +107,6 @@ function combineAllPaths(pathArray) {
     else path += "/" + x;
   });
   return path;
-}
-
-function parseRouteName(data) {
-  if ((data.match(/function/)) || (data.match(/path/))) { // If there's the word function, get string after ','
-    return checkForQuoteType(data.split(',')[1]); // Check for " or ' quote type
-  } else { // If there's no 'function' or 'path'
-    return checkForQuoteType(data);
-  }
 }
 
 function writeToFile() {
@@ -143,6 +186,9 @@ function formatDate() {
 }
 
 function checkForQuoteType(data) {
-  if (data.includes("'")) return data.match(/\'.*\'/)[0].replace(/'|"/g, "");
-  else return data.match(/\".*\"/)[0].replace(/'|"/g, "");
+  // console.log('DATA:', data)
+  if (data !== undefined && data.includes("'" || data.includes('"'))) {
+    if (data.includes("'")) return data.match(/\'.*\'/)[0].replace(/'|"/g, "");
+    else return data.match(/\".*\"/)[0].replace(/'|"/g, "");
+  } else return data;
 }
