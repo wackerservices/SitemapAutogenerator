@@ -101,12 +101,12 @@ Please add these to your environment.js file as shown in the example below
 
 * Routes with dynamic segments, ie "/artist/:artist_id", are not yet supported.
 * The sitemap-autogenerator is limited to basic XML sitemaps and cannot currently manage image and video file information for resources on a page or rich media content.
-* **sitemap-autogenerator** assumes you use the following standard Ember file structure: `app/dist/sitemap.xml` 
+* **sitemap-autogenerator** assumes you use the following standard Ember file structure: `myproject/dist/sitemap.xml` 
 
 ## Example of Output
 
 ```xml
-<!-- app/dist/sitemap.xml -->
+<!-- myproject/dist/sitemap.xml -->
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
