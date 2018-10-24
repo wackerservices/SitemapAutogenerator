@@ -1,6 +1,6 @@
 {
   "name": "sitemap-autogenerator",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "An ember-cli addon to parse router.js and automatically generate a sitemap.xml.",
   "keywords": [
     "ember-addon",
