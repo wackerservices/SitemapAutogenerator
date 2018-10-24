@@ -1,6 +1,6 @@
-/* eslint-env node */
 'use strict';
 
 module.exports = {
-  name: 'sitemap-autogenerator'
+  //name: 'sitemap-autogenerator'
+  name: require('./package').name
 };

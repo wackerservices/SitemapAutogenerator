@@ -1,135 +1,150 @@
 /* eslint-env node */
+let acorn = require('acorn');
+
+var ENV = require(process.cwd() + '/config/environment');
 const fs = require('fs');
 
-var baseURL;
+var baseURL, routerFound = false, fileData = '',
+  routeArray = [];
 
-const pathForRouterJS = 'app/router.js';
-
-var routeArray = [];
-var fileData = '';
-const currentDate = new Date();
-
+const pathForRouterJS = 'app/router.js',
+  currentDate = new Date();
 const header = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
+let nestedPath = [];
+
 module.exports = {
   description: '',
-  triggerSitemapBuilder: function(theURL) {
+  triggerSitemapBuilder: function (theURL) {
     baseURL = theURL;
     fs.readFile(pathForRouterJS, 'utf8', function (err, data) {
       if (err) return console.log('Encountered the following error:', err);
 
-      let splitBy = /Router.map\(\s*function\s*\(\)\s*\{/; // Provision for variations in spacing for this line
-      data = data.split(splitBy)[1]; // Split file text into code lines by 'Router.map', resulting in two code chunks --> choose the chunk after 'Router.map'
+      let parseResults = acorn.parse(data, {
+        "sourceType": "module"
+      });
 
-      splitDataIntoArrayOfRoutes(data);
-      findEndOfCodeBlock(data);
+      let arrayToMap = parseResults.body;
+      arrayToMap.map(function (item) { // Look for the Router object in the file -> i.e. Router.map(function()...
+        if (item.type === "ExpressionStatement" && item.expression.callee.object.name === "Router") {
+          routerFound = true;
+          let innerArrayToMap = item.expression.arguments[0].body.body;
+          innerArrayToMap.map(function (item) { // Look for each this.route in Router.map
+            isSingleOrNestedRoute(item.expression.arguments);
+          });
+        }
+      });
+
+      if (routerFound === false) console.log('!!! sitemap-autogenerator could not find a Router object in your ember router.js file, process aborted!');
+      else {
+        // console.log(routeArray);
+        writeToFile();
+      }
     });
   },
-
-  locals: function(options) {
-    fs.readFile(pathForRouterJS, 'utf8', function (err, data) {
-      if (err) return console.log('Encountered the following error:', err);
-
-      let splitBy = /Router.map\(\s*function\s*\(\)\s*\{/; // Provision for variations in spacing for this line
-      data = data.split(splitBy)[1]; // Split file text into code lines by 'Router.map', resulting in two code chunks --> choose the chunk after 'Router.map'
-
-      splitDataIntoArrayOfRoutes(data);
-      findEndOfCodeBlock(data);
-    });
-
-    return options;
-  },
-
-  afterInstall(options) {
-  }
 };
 
-function splitDataIntoArrayOfRoutes(data) {
-  let testRE = data.match(/this.route*?[\s\S]*?\;/g);
-  testRE.map(function (x, i) { // x is current value, i is index, optional third parameter is the enter array
-    if (!testRE[i].match(/\*/g) && !testRE[i].match(/\/\:/)) { // Exclude any route with ':' in the path (for route variable) and any route with '*' in the path
-      routeArray.push({
-        completeRoute: testRE[i],
-        path: parseRouteName(testRE[i]),
-        baseRoot: parseBaseRouteNames(testRE[i])
-      });
-    }
-  });
-}
-
-function parseRouteName(data) {
-  if ((data.match(/function/)) || (data.match(/path/))) { // If there's the word function, get string after ','
-    return checkForQuoteType(data.split(',')[1]); // Check for " or ' quote type
-  } else { // If there's no 'function' or 'path'
-    return checkForQuoteType(data);
-  }
-}
-
-function parseBaseRouteNames(data) {
-  if (data.match(/function/)) { // If there's the word function in the route, add route name as baseRoot
-    return checkForQuoteType(data.split(',')[0]);
-  }
-}
-
-function findEndOfCodeBlock(data) {
-  let testRE = data.match(/  [\w\s]+\w*\}\)\;\w*[\s\S]*?\{/g);
-  if (testRE != null) {
-    testRE.map(function (x, i) {
-      let matchCount = (testRE[i].match(/\}\)\;/g) || []).length; // Detects how many many there are of '});'
-      if (matchCount == 1) findPreviousBaseRoot(checkForQuoteType(testRE[i])); // Check for " or ' quote type
-      else if (matchCount > 1) findPreviousBaseRootIfDoublyNestedOrMore(checkForQuoteType(testRE[i])); // Check for " or ' quote type); --> GO HERE FOR MORE THAN ONE MATCH!
+function processPath(path, message) {
+  if (!path.match(/\*/g) && !path.match(/\/\:/)) { // Exclude any route with ':' in the path (for route variable) and any route with '*' in the path
+    // console.log(message, path);
+    routeArray.push({
+      completeRoute: combineAllPaths(nestedPath),
+      path: checkForQuoteType(path)
     });
   }
-  writeToFile();
 }
 
-function findUndefinedBeforeCodeBlock(currentRoot) { // Go back in reverse order until we find the next base route prior to this
-  let currentIndex, baseRoot, baseRootIndex;
-  routeArray.find((n, i) => { // Find currentIndex
-    if (n.baseRoot == currentRoot) {
-      currentIndex = i;
+function isSingleOrNestedRoute(itemExpressionArgument) {
+  if (itemExpressionArgument.length !== undefined) {
+    if (itemExpressionArgument.length === 1) {
+      processPath(itemExpressionArgument[0].value, '*** It\'s a simple route, no nesting, and no specified path ->');
+    } else if (itemExpressionArgument.length === 2 && itemExpressionArgument[1].properties !== undefined && itemExpressionArgument[1].properties[0].key.name === "path") {
+      processPath(itemExpressionArgument[1].properties[0].value.value, '*** It\'s a simple route with a specified path ->')
+    } else {
+      if (itemExpressionArgument[1].type === "FunctionExpression") {
+        nestedPath.push(itemExpressionArgument[0].value);
+        // console.log('*** +++ Found a nested function with nested path name ->', itemExpressionArgument[0].value);
+        // console.log('nestedPath:', nestedPath);
+        let itemExpressionArgumentToRecurse = itemExpressionArgument[1].body.body;
+        itemExpressionArgumentToRecurse.map(function (item, index) {
+          isSingleOrNestedRoute(item);
+          if (index === itemExpressionArgumentToRecurse.length - 1) {
+            nestedPath.pop();
+            // console.log('nestedPath:', nestedPath);
+          }
+        });
+      }
     }
+  } else { // Necessary for recursed routes
+    if (itemExpressionArgument.expression.arguments.length === 1) {
+      processPath(itemExpressionArgument.expression.arguments[0].value, '  *** It\'s a simple route, no nesting, and no specified path ->');
+    } else if (itemExpressionArgument.expression.arguments.length === 2 && itemExpressionArgument.expression.arguments[1].properties !== undefined && itemExpressionArgument.expression.arguments[1].properties[0].key.name === "path") {
+      // console.log('!!!', itemExpressionArgument.expression.arguments[1].properties[0].value.value);
+      processPath(itemExpressionArgument.expression.arguments[1].properties[0].value.value, '  *** It\'s a simple route with a specified path ->');
+    } else {
+      if (itemExpressionArgument.expression.arguments[1].type === "FunctionExpression") {
+        nestedPath.push(itemExpressionArgument.expression.arguments[0].value);
+        // console.log('*** +++ Found a nested function with nested path name ->', itemExpressionArgument.expression.arguments[0].value);
+        // console.log('nestedPath:', nestedPath);
+        let itemExpressionArgumentToRecurse = itemExpressionArgument.expression.arguments[1].body.body;
+        itemExpressionArgumentToRecurse.map(function (item, index) {
+          isSingleOrNestedRoute(item);
+          if (index === itemExpressionArgumentToRecurse.length - 1) {
+            nestedPath.pop();
+            // console.log('nestedPath:', nestedPath);
+          }
+        });
+      }
+    }
+  }
+}
+
+function combineAllPaths(pathArray) {
+  let path = "";
+  pathArray.map(function (x, i) {
+    if (i == 0) path += x;
+    else path += "/" + x;
   });
-  for (let i = currentIndex - 1; i >= 0; i--) {
-    if (routeArray[i].baseRoot == undefined) { // Gets to first undefined before nested function
-      findPreviousNestedBaseRootName(i, currentIndex, baseRoot, baseRootIndex, currentRoot);
-      break;
-    }
-  };
-}
-
-function findPreviousNestedBaseRootName(currentIndex, previousCurrentIndex, previousBaseRoot, previousBaseRootIndex, currentRoot) {
-  for (let i = currentIndex - 1; i >= 0; i--) {
-    if (routeArray[i].baseRoot !== undefined) { // Gets to first defined function before nested function
-      let newBaseRoot = checkForQuoteType(routeArray[i].completeRoute.split(',')[0]); // Check for " or ' quote type
-      rewriteBaseRoot(i, previousCurrentIndex, previousBaseRoot, previousBaseRootIndex, newBaseRoot, currentRoot);
-      break;
-    }
-  }
-}
-
-// Will need to harden this to handle additional nesting past 2!
-function rewriteBaseRoot(indexToBeginRewrite, previousIndex, previousBaseRoot, previousBaseRootIndex, newBaseRoot, currentRoot) {
-  for (var i = indexToBeginRewrite; i < previousIndex + 1; i++) {
-    if (routeArray[i].baseRoot == undefined) {
-      routeArray[i].baseRoot = newBaseRoot;
-    } else if (routeArray[i].baseRoot !== newBaseRoot) { // WILL NEED TO ADD A CHECK FOR MULTIPLE ADDITIONAL baseRoots
-      routeArray[i].baseRoot2 = routeArray[i].baseRoot;
-      routeArray[i].baseRoot = newBaseRoot;
-    }
-    if (i == previousIndex) {}  // CAN BE REMOVED IN FUNCTION REFACTORING
-  }
+  return path;
 }
 
 function writeToFile() {
+  let changeFrequency, priority, showLog; // Look for custom values for 'changeFrequency' and 'defaultPriorityValue' in environment.js
+  if (ENV()["sitemap-autogenerator"] !== undefined) { // Check to see if user has created ENV "sitemap-autogenerator" in environment.js
+    if (ENV()["sitemap-autogenerator"].changeFrequency !== undefined) changeFrequency = ENV()["sitemap-autogenerator"].changeFrequency;
+    else changeFrequency = "daily";
+    if (ENV()["sitemap-autogenerator"].defaultPriorityValue !== undefined) priority = ENV()["sitemap-autogenerator"].defaultPriorityValue;
+    else priority = "0.5";
+    if (ENV()["sitemap-autogenerator"].showLog !== undefined && ENV()["sitemap-autogenerator"].showLog === true) showLog = true;
+    else showLog = false;
+  } else {
+    console.log("\n! It looks like sitemap-autogenerator is installed but not properly configured. A default sitemap.xml will be created.\n! Please refer to the documentation regarding adding 'sitemap-autogenerator' to your ENV in environment.js file: https://www.npmjs.com/package/sitemap-autogenerator");
+    changeFrequency = "daily";
+    priority = "0.5";
+    showLog = false;
+  }
+
   routeArray.map(function (x, i) {
     if (i == 0) fileData += header; // Write the header
-    fileData += ('\n  <url>\n    <loc>');
-    if (routeArray[i].baseRoot == undefined) writeToFileSwitch(1, i); // Scenario 1: baseRoot is undefined
-    else if (routeArray[i].baseRoot2) writeToFileSwitch(2, i); // Scenario 2: baseRoot[X] exists
-    else writeToFileSwitch(3, i); // Scenario 3: there is a baseRoot, but no additional nested baseRoots
-    fileData += ('</loc>\n    <lastmod>' + formatDate(currentDate) + '</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>');
+
+    var regex = /\//g;
+    let currentPath = routeArray[i].path;
+    let currentPriority = priority;
+
+    currentPath = currentPath.replace(regex, '');
+    if (ENV()["sitemap-autogenerator"] === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes[currentPath] === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes[currentPath] !== true) {
+      let isIgnored = false;
+      fileData += ('\n  <url>\n    <loc>');
+      writeToFileData(i, showLog, isIgnored);
+
+      if (ENV()["sitemap-autogenerator"] !== undefined && ENV()["sitemap-autogenerator"].customPriority !== undefined && ENV()["sitemap-autogenerator"].customPriority[currentPath] !== undefined) currentPriority = ENV()["sitemap-autogenerator"].customPriority[currentPath];
+
+      fileData += ('</loc>\n    <lastmod>' + formatDate() + '</lastmod>\n    <changefreq>' + changeFrequency + '</changefreq>\n    <priority>' + currentPriority + '</priority>\n  </url>');
+    } else {
+      let isIgnored = true;
+      writeToFileData(i, showLog, isIgnored);
+    }
   });
   fileData += ('\n</urlset>');
 
@@ -141,35 +156,27 @@ function writeToFile() {
   });
 }
 
-function writeToFileSwitch(scenario, i) {
-  if (routeArray[i].path !== '/' && !routeArray[i].path.match(/\//g) && !routeArray[i].path.match(/\:/g)) {
-    switch (scenario) {
-      case 1:
-        fileData += (baseURL + '/' + routeArray[i].path);
-        break;
-      case 2:
-        fileData += (baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].baseRoot2 + '/' + routeArray[i].path);
-        break;
-      case 3:
-        fileData += (baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].path);
-        break;
-    }
-  } else if (!routeArray[i].path.match(/\:/g)) {
-    switch (scenario) {
-      case 1:
-        fileData += (baseURL + routeArray[i].path);
-        break;
-      case 2:
-        fileData += (baseURL + '/' + routeArray[i].baseRoot + '/' + routeArray[i].baseRoot2 + routeArray[i].path);
-        break;
-      case 3:
-        fileData += (baseURL + '/' + routeArray[i].baseRoot + routeArray[i].path);
-        break;
-    }
+function writeToFileData(i, showLog, isIgnored) {
+  let isIgnoredMessage = '** Ignored path:';
+  let pathString = baseURL;
+  if (routeArray[i].completeRoute !== "") {
+    let routeString;
+    if (routeArray[i].completeRoute.charAt(0) === "/") routeString = routeArray[i].completeRoute.substr(1);
+    else routeString = routeArray[i].completeRoute;
+    pathString += '/' + routeString;
   }
+  if (routeArray[i].path !== "" && routeArray[i] !== "/") {
+    let cleanedPath;
+    if (routeArray[i].path.charAt(0) === "/") cleanedPath = routeArray[i].path.substr(1);
+    else cleanedPath = routeArray[i].path;
+    pathString += "/" + cleanedPath;
+  }
+  if (isIgnored === false) fileData += (pathString);
+  if (showLog === true && isIgnored === false) console.log(pathString);
+  else if (showLog === true && isIgnored === true) console.log(isIgnoredMessage, pathString);
 }
 
-function formatDate(dateObject) {
+function formatDate() {
   let date, year, month, day;
   day = currentDate.getDate(), month = currentDate.getMonth() + 1, year = currentDate.getFullYear();
   if (day < 10) day = '0' + day;
@@ -178,47 +185,10 @@ function formatDate(dateObject) {
   return date;
 }
 
-function findPreviousBaseRoot(currentRoot) { // Go back in reverse order until we find the next base route prior to this
-  let currentIndex, baseRoot, baseRootIndex;
-  routeArray.find((n, i) => { // Find currentIndex
-    if (n.baseRoot == currentRoot) currentIndex = i;
-  });
-  for (let i = currentIndex - 1; i >= 0; i--) {
-    if (routeArray[i].baseRoot !== undefined) {
-      baseRoot = routeArray[i].baseRoot;
-      baseRootIndex = i;
-      fillInBaseRoot(baseRootIndex, baseRoot, currentIndex);
-      break;
-    }
-  };
-}
-
-function findPreviousBaseRootIfDoublyNestedOrMore(currentRoot) { // Go back in reverse order until we find the next base route prior to this
-  let currentIndex, baseRoot, baseRootIndex;
-  routeArray.find((n, i) => { // Find currentIndex
-    if (n.path == currentRoot) currentIndex = i;
-  });
-
-  for (let i = routeArray.length - 1; i >= 0; i--) {
-    if (routeArray[i].baseRoot !== undefined) {
-      baseRoot = routeArray[i].baseRoot;
-      baseRootIndex = i;
-      fillInBaseRoot(baseRootIndex, baseRoot, currentIndex, true);
-      break;
-    }
-  };
-}
-
-function fillInBaseRoot(baseRootIndex, baseRoot, currentIndex, isNested) {
-  for (let i = baseRootIndex; i < currentIndex; i++) {
-    routeArray[i].baseRoot = baseRoot;
-    if (i == currentIndex - 1) {
-      if (isNested == true) findUndefinedBeforeCodeBlock(baseRoot);
-    }
-  }
-}
-
 function checkForQuoteType(data) {
-  if (data.includes("'")) return data.match(/\'.*\'/)[0].replace(/'|"/g, "");
-  else return data.match(/\".*\"/)[0].replace(/'|"/g, "");
+  // console.log('DATA:', data)
+  if (data !== undefined && data.includes("'" || data.includes('"'))) {
+    if (data.includes("'")) return data.match(/\'.*\'/)[0].replace(/'|"/g, "");
+    else return data.match(/\".*\"/)[0].replace(/'|"/g, "");
+  } else return data;
 }
