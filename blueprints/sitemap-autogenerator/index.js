@@ -4,7 +4,8 @@ let acorn = require('acorn');
 var ENV = require(process.cwd() + '/config/environment');
 const fs = require('fs');
 
-var baseURL, routerFound = false, fileData = '',
+var baseURL, routerFound = false,
+  fileData = '',
   routeArray = [];
 
 const pathForRouterJS = 'app/router.js',
@@ -13,6 +14,18 @@ const header = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
 let nestedPath = [];
+let ignoredPathObject = {};
+
+if (ENV()["sitemap-autogenerator"] !== undefined && ENV()["sitemap-autogenerator"].ignoreTheseRoutes !== undefined) { // Remove all / from ignoreTheseRoutes
+  ignoredPathObject = ENV()["sitemap-autogenerator"].ignoreTheseRoutes;
+  Object.keys(ignoredPathObject).map(function (key) {
+    if (key.indexOf('/') > -1) {
+      let newKey = key.replace(/\//g, "");
+      ignoredPathObject[newKey] = ignoredPathObject[key];
+      delete ignoredPathObject[key];
+    }
+  });
+}
 
 module.exports = {
   description: '',
@@ -133,7 +146,8 @@ function writeToFile() {
     let currentPriority = priority;
 
     currentPath = currentPath.replace(regex, '');
-    if (ENV()["sitemap-autogenerator"] === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes[currentPath] === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes[currentPath] !== true) {
+
+    if (ENV()["sitemap-autogenerator"] === undefined || ENV()["sitemap-autogenerator"].ignoreTheseRoutes === undefined || ignoredPathObject[currentPath] !== true || ignoredPathObject[currentPath] !== true) {
       let isIgnored = false;
       fileData += ('\n  <url>\n    <loc>');
       writeToFileData(i, showLog, isIgnored);
