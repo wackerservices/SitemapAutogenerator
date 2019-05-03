@@ -21,7 +21,6 @@ To install simply run:
 
 ## Usage
 
-<<<<<<< HEAD
   Add the following code to **package.json**: 
 ```js
 "postbuild": "node -e \"require('./node_modules/sitemap-autogenerator/blueprints/sitemap-autogenerator/index').triggerSitemapBuilder('<YOUR SITE ROOT URL>')\"",
@@ -139,7 +138,6 @@ Please add these to your environment.js file as shown in the example below
 
 * `ember serve`
 * Visit the dummy application at [http://localhost:4200](http://localhost:4200).
-=======
 Usage
 ------------------------------------------------------------------------------
 
@@ -150,7 +148,6 @@ Contributing
 ------------------------------------------------------------------------------
 
 See the [Contributing](CONTRIBUTING.md) guide for details.
->>>>>>> 663df72... message
 
 
 License
