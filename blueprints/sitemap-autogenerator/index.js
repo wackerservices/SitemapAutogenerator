@@ -49,6 +49,15 @@ module.exports = {
         }
       });
 
+      if (ENV()["sitemap-autogenerator"] !== undefined && Array.isArray(ENV()["sitemap-autogenerator"].pathsOutsideEmberApp)) {
+        ENV()["sitemap-autogenerator"].pathsOutsideEmberApp.forEach(function(path){
+          routeArray.push({
+            completeRoute: '',
+            path: path
+          });
+        });
+      }
+
       if (routerFound === false) console.log('!!! sitemap-autogenerator could not find a Router object in your ember router.js file, process aborted!');
       else {
         // console.log(routeArray);
