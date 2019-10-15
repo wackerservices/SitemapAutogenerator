@@ -93,7 +93,7 @@ Please add these to your environment.js file as shown in the example below
       'general': '0.7',
       'coresoftwaredeveloper': '0.8'
     },
-    pathsOutsideEmberApp: [ // Optional (if not included in ENV, this will be ignored)
+    pathsOutsideEmberApp: [ // Optional (pathsOutsideEmberApp may be omitted)
       'blog',
       'some/other/path.html'
     ]
