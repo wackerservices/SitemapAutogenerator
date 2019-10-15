@@ -126,9 +126,15 @@ Please add these to your environment.js file as shown in the example below
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.<mysite>.com/</loc>
-    <lastmod>2017-10-31</lastmod>
+    <lastmod>2019-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.<mysite>.com/blog</loc><!-- an example of a pathsOutsideEmberApp item being injected -->
+    <lastmod>2019-10-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>
 ```
