@@ -8,7 +8,8 @@ var baseURL, routerFound = false,
   fileData = '',
   routeArray = [];
 
-const pathForRouterJS = 'app/router.js',
+const routerJsPath = 'app/router.js',
+  routerTsPath = 'app/router.ts',
   currentDate = new Date();
 const header = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
@@ -31,41 +32,59 @@ module.exports = {
   description: '',
   triggerSitemapBuilder: function (theURL) {
     baseURL = theURL;
-    fs.readFile(pathForRouterJS, 'utf8', function (err, data) {
-      if (err) return console.log('Encountered the following error:', err);
 
-      let parseResults = acorn.parse(data, {
-        "sourceType": "module"
-      });
-
-      let arrayToMap = parseResults.body;
-      arrayToMap.map(function (item) { // Look for the Router object in the file -> i.e. Router.map(function()...
-        if (item.type === "ExpressionStatement" && item.expression.callee.object.name === "Router") {
-          routerFound = true;
-          let innerArrayToMap = item.expression.arguments[0].body.body;
-          innerArrayToMap.map(function (item) { // Look for each this.route in Router.map
-            isSingleOrNestedRoute(item.expression.arguments);
-          });
-        }
-      });
-
-      if (ENV()["sitemap-autogenerator"] !== undefined && Array.isArray(ENV()["sitemap-autogenerator"].pathsOutsideEmberApp)) {
-        ENV()["sitemap-autogenerator"].pathsOutsideEmberApp.forEach(function(path){
-          routeArray.push({
-            completeRoute: '',
-            path: path
-          });
+    fs.access(routerJsPath, fs.constants.R_OK, (jsRouterErr) => {
+      if (!jsRouterErr) {
+        processRouterFile(routerJsPath);
+      } else {
+        fs.access(routerTsPath, fs.constants.R_OK, (tsRouterErr) => {
+          if (!tsRouterErr) {
+            processRouterFile(routerTsPath);
+          } else {
+            console.log(`${routerJsPath} is not readable : ${jsRouterErr}`);
+            console.log(`${routerTsPath} is not readable : ${tsRouterErr}`);
+          }
         });
-      }
-
-      if (routerFound === false) console.log('!!! sitemap-autogenerator could not find a Router object in your ember router.js file, process aborted!');
-      else {
-        // console.log(routeArray);
-        writeToFile();
       }
     });
   },
 };
+
+function processRouterFile(routerPath) {
+  fs.readFile(routerPath, 'utf8', function (err, data) {
+    if (err) return console.log('Encountered the following error:', err);
+
+    let parseResults = acorn.parse(data, {
+      "sourceType": "module"
+    });
+
+    let arrayToMap = parseResults.body;
+    arrayToMap.map(function (item) { // Look for the Router object in the file -> i.e. Router.map(function()...
+      if (item.type === "ExpressionStatement" && item.expression.callee.object.name === "Router") {
+        routerFound = true;
+        let innerArrayToMap = item.expression.arguments[0].body.body;
+        innerArrayToMap.map(function (item) { // Look for each this.route in Router.map
+          isSingleOrNestedRoute(item.expression.arguments);
+        });
+      }
+    });
+
+    if (ENV()["sitemap-autogenerator"] !== undefined && Array.isArray(ENV()["sitemap-autogenerator"].pathsOutsideEmberApp)) {
+      ENV()["sitemap-autogenerator"].pathsOutsideEmberApp.forEach(function(path){
+        routeArray.push({
+          completeRoute: '',
+          path: path
+        });
+      });
+    }
+
+    if (routerFound === false) console.log('!!! sitemap-autogenerator could not find a Router object in your ember router.js file, process aborted!');
+    else {
+      // console.log(routeArray);
+      writeToFile();
+    }
+  });
+}
 
 function processPath(path, message) {
   if (!path.match(/\*/g) && !path.match(/\/\:/)) { // Exclude any route with ':' in the path (for route variable) and any route with '*' in the path
