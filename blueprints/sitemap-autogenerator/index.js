@@ -1,5 +1,6 @@
 /* eslint-env node */
-let acorn = require('acorn');
+const { Parser } = require('acorn');
+const classFields = require('acorn-class-fields');
 
 var ENV = require(process.cwd() + '/config/environment');
 const fs = require('fs');
@@ -34,8 +35,8 @@ module.exports = {
     fs.readFile(pathForRouterJS, 'utf8', function (err, data) {
       if (err) return console.log('Encountered the following error:', err);
 
-      let parseResults = acorn.parse(data, {
-        "sourceType": "module"
+      let parseResults = Parser.extend(classFields).parse(data, {
+        sourceType: 'module',
       });
 
       let arrayToMap = parseResults.body;
