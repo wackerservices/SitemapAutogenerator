@@ -35,7 +35,6 @@
     "@ember/test-helpers": "^2.1.4",
     "@glimmer/component": "^1.0.3",
     "@glimmer/tracking": "^1.0.3",
-    "acorn": "^6.0.2",
     "babel-eslint": "^10.1.0",
     "broccoli-asset-rev": "^3.0.0",
     "ember-auto-import": "^1.10.1",
@@ -77,6 +76,8 @@
     "configPath": "tests/dummy/config"
   },
   "dependencies": {
+    "acorn": "^6.4.2",
+    "acorn-class-fields": "^1.0.0",
     "ember-cli-htmlbars": "^5.3.1"
   }
 }
