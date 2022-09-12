@@ -9,8 +9,9 @@ var baseURL, routerFound = false,
   fileData = '',
   routeArray = [];
 
-const pathForRouterJS = 'app/router.js',
-  currentDate = new Date();
+const pathForRouterJS = 'app/router.js';
+const emberCliPath = '.ember-cli';
+const currentDate = new Date();
 const header = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
@@ -172,12 +173,34 @@ function writeToFile() {
   });
   fileData += ('\n</urlset>');
 
-  fs.writeFile("dist/sitemap.xml", fileData, function (err) {
+  const outputPath = readOutputPath();
+
+  fs.writeFile(`${outputPath}sitemap.xml`, fileData, function (err) {
     if (err) {
       return console.log(err);
     }
-    console.log("\nA new version of sitemap.xml was successfully saved\n");
+    console.log(
+      `\nA new version of ${outputPath}sitemap.xml was successfully saved\n`
+    );
   });
+}
+
+function readOutputPath() {
+  let outputPath = 'dist/';
+  try {
+    const emberCliFile = fs.readFileSync(emberCliPath, 'utf-8');
+    const emberCliJson = JSON.parse(emberCliFile);
+    if (emberCliJson['output-path']) {
+      outputPath = emberCliJson['output-path'];
+    }
+    if (emberCliJson['outputPath']) {
+      outputPath = emberCliJson['outputPath'];
+    }
+  } catch {
+    outputPath = 'dist/';
+  }
+
+  return outputPath;
 }
 
 function writeToFileData(i, showLog, isIgnored) {
